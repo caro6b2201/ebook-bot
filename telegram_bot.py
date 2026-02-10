@@ -2,6 +2,9 @@
 
 import os
 import sys
+import threading
+
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 import telebot
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -93,6 +96,19 @@ def handle_callback(call):
     bot.answer_callback_query(call.id)
 
 
+class HealthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"OK")
+
+    def log_message(self, *args):
+        pass
+
+
 if __name__ == "__main__":
-    print("Bot is running... Press Ctrl+C to stop.")
+    port = int(os.environ.get("PORT", 8080))
+    server = HTTPServer(("0.0.0.0", port), HealthHandler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    print(f"Health check on port {port}. Bot is running...")
     bot.infinity_polling()
