@@ -6,3 +6,14 @@ services:
     startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
     plan: free
     autoDeploy: true
+
+  - type: worker
+    name: ebook-telegram-bot
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python telegram_bot.py
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
